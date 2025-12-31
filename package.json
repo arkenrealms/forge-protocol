@@ -1,12 +1,12 @@
 {
-  "name": "@arken/cerebro-protocol",
+  "name": "@arken/forge-protocol",
   "version": "0.1.0",
   "main": "src/index.ts",
   "scripts": {},
   "dependencies": {
     "@arken/node": "workspace:*",
-    "@trpc/client": "next",
-    "@trpc/server": "next",
+    "@trpc/client": "11.0.0-rc.660",
+    "@trpc/server": "11.0.0-rc.660",
     "zod": "^3",
     "dotenv": "^16"
   },

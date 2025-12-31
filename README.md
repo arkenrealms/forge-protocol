@@ -1,3 +1,3 @@
-# Cerebro Protocol
+# Forge Protocol
 
-Cerebro is an agent swarm in the Arken Realms network.
+Forge is an AI-driven interface.
