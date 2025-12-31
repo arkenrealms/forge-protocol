@@ -14,45 +14,6 @@ export const createCallerFactory = t.createCallerFactory;
 
 export const createRouter = (service: any) =>
   router({
-    ask: procedure
-      .input(
-        z.object({
-          mod: z.string().describe('mod'),
-          messages: z.array(z.string()).describe('messages'),
-          tags: z.array(z.string()).optional().describe('tags'),
-          data: z.any().optional().describe('data'),
-        })
-      )
-      .query(({ input, ctx }) => (service.ask as any)(input, ctx)),
-
-    exec: procedure
-      .input(
-        z.object({
-          agent: z.string().describe('agent'),
-          method: z.string().describe('method'),
-          params: z.array(z.any()).optional().describe('params'),
-        })
-      )
-      .query(({ input, ctx }) => (service.exec as any)(input, ctx)),
-
-    info: procedure.query(({ input, ctx }) => (service.info as any)(input, ctx)),
-
-    auth: procedure
-      .input(
-        z.object({
-          data: z.any(),
-          signature: z.object({ hash: z.string(), address: z.string() }),
-        })
-      )
-      .mutation(({ input, ctx }) => {
-        return {
-          status: 1,
-          data: {
-            maxClients: 100,
-          },
-        };
-      }),
-
     core: createCoreRouter(t),
   });
 
