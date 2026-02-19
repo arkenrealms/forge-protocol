@@ -7,11 +7,19 @@
 ## Findings
 - `core/core.router.ts` defines a single `sync` mutation with broad `any` typing for `t`, `ctx`, and `service` dispatch.
 - `index.ts` exports router helpers and wires `core` namespace; typing is intentionally loose.
-- Repo currently has no runnable local toolchain in this runtime (`tsc` and `jest` binaries unavailable), so source hardening is blocked by the source-change test gate.
+- Gate verification in this run:
+  - `npm test` fails (`Missing script: "test"`).
+  - `rushx test` fails (package command `test` not defined).
+- With no repo-defined test command, source hardening is blocked by the source-change test gate for this slot.
 
-## Next safe code targets (when test runtime is restored)
-- Add explicit context/service types for `sync` mutation dispatch.
-- Add Jest+TS unit tests for:
-  - input schema validation (`kind`, `targets`, `reason`)
-  - `sync` dispatch invocation shape (`ctx.app.service.sync` called once with input+ctx)
-  - error propagation when service is missing or throws.
+## Next safe code targets (after minimal Jest+TS harness is added)
+- Add package scripts:
+  - `"test": "jest --runInBand"`
+  - `"test:watch": "jest --watch"` (optional)
+- Add minimal Jest TS support in-package (no ad-hoc npx):
+  - dev deps: `ts-jest`, `typescript`.
+  - `jest.config.ts` using `preset: 'ts-jest'`.
+- Then apply focused source improvements with tests:
+  - explicit context/service typing for `sync` dispatch,
+  - input schema validation edge tests (`kind`, `targets`, `reason`),
+  - dispatch/error-shape tests (`ctx.app.service.sync` invocation + thrown/missing service behavior).
