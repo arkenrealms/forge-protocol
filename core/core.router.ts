@@ -7,9 +7,9 @@ export const createRouter = (t: any) =>
     sync: t.procedure
       .input(
         z.object({
-          kind: z.string(),
-          targets: z.array(z.string()),
-          reason: z.string(),
+          kind: z.string().trim().min(1),
+          targets: z.array(z.string().trim().min(1)).min(1),
+          reason: z.string().trim().min(1),
         })
       )
       .mutation(({ input, ctx }) => {
