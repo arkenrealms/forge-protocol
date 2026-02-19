@@ -9,8 +9,8 @@
 - `index.ts` exports router helpers and wires `core` namespace; typing is intentionally loose.
 - Gate verification in this run:
   - `npm test` fails (`Missing script: "test"`).
-  - `rushx test` fails (package command `test` not defined).
-- With no repo-defined test command, source hardening is blocked by the source-change test gate for this slot.
+  - temporary local harness probe (`"test": "jest --runInBand --coverage=false"`) still fails with `jest: command not found` in this runtime, so it was reverted to keep mainline clean.
+- With no runnable package test command, source hardening is blocked by the source-change test gate for this slot.
 
 ## Next safe code targets (after minimal Jest+TS harness is added)
 - Add package scripts:

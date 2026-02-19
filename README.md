@@ -4,6 +4,6 @@ Forge protocol defines local/browser-executed tRPC procedure contracts used by F
 
 ## Current status
 - Source analyzed in this run: `index.ts`, `core/core.router.ts`.
-- Source-change gate blocker remains active in this slot: no repo `test` script is defined, and `rushx test` is also unavailable for this package command map.
+- Source-change gate blocker remains active in this slot: package test tooling is not runnable in this environment (`jest: command not found`).
 - To keep gate compliance, this run is docs/analysis-only for protocol slot continuity.
-- Added `ANALYSIS.md` follow-ups for minimal Jest+TS harness setup before any source edits.
+- `ANALYSIS.md` tracks minimal Jest+TS harness follow-ups before any source edits.
