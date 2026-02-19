@@ -5,21 +5,14 @@
 - Current live source footprint is minimal (`index.ts`, `core/core.router.ts`).
 
 ## Findings
-- `core/core.router.ts` defines a single `sync` mutation with broad `any` typing for `t`, `ctx`, and `service` dispatch.
-- `index.ts` exports router helpers and wires `core` namespace; typing is intentionally loose.
-- Gate verification in this run:
-  - `npm test` fails (`Missing script: "test"`).
-  - temporary local harness probe (`"test": "jest --runInBand --coverage=false"`) still fails with `jest: command not found` in this runtime, so it was reverted to keep mainline clean.
-- With no runnable package test command, source hardening is blocked by the source-change test gate for this slot.
+- `core/core.router.ts` still defines a small single-procedure surface, but now guards `ctx?.app?.service?.sync` before dispatch.
+- Missing service path now throws a deterministic `TypeError` (`forge.core.sync requires ctx.app.service.sync to be a function`) rather than crashing with an indirect property error.
+- Added package-level test script so `rushx test` is runnable in this repo:
+  - `test`: `node --experimental-strip-types --test test/core.router.test.mjs`
+- Added `test/core.router.test.mjs` to validate:
+  - successful `sync(input, ctx)` dispatch,
+  - clear failure when `ctx.app.service.sync` is missing.
 
-## Next safe code targets (after minimal Jest+TS harness is added)
-- Add package scripts:
-  - `"test": "jest --runInBand"`
-  - `"test:watch": "jest --watch"` (optional)
-- Add minimal Jest TS support in-package (no ad-hoc npx):
-  - dev deps: `ts-jest`, `typescript`.
-  - `jest.config.ts` using `preset: 'ts-jest'`.
-- Then apply focused source improvements with tests:
-  - explicit context/service typing for `sync` dispatch,
-  - input schema validation edge tests (`kind`, `targets`, `reason`),
-  - dispatch/error-shape tests (`ctx.app.service.sync` invocation + thrown/missing service behavior).
+## Follow-ups
+- Tighten `createRouter` typing (`t` and context) to reduce `any` surface while keeping current API shape stable.
+- Add input edge-case tests (`targets` empty, malformed reason/kind values) if behavior requirements are clarified.
