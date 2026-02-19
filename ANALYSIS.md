@@ -5,21 +5,15 @@
 - Current live source footprint is minimal (`index.ts`, `core/core.router.ts`).
 
 ## Findings
-- `core/core.router.ts` defines a single `sync` mutation with broad `any` typing for `t`, `ctx`, and `service` dispatch.
-- `index.ts` exports router helpers and wires `core` namespace; typing is intentionally loose.
-- Gate verification in this run:
-  - `npm test` fails (`Missing script: "test"`).
-  - temporary local harness probe (`"test": "jest --runInBand --coverage=false"`) still fails with `jest: command not found` in this runtime, so it was reverted to keep mainline clean.
-- With no runnable package test command, source hardening is blocked by the source-change test gate for this slot.
+- `core/core.router.ts` now validates `ctx.app.service.sync` before dispatching and throws a clear error if the service hook is missing.
+- `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose, but runtime failure mode for `core.sync` is now deterministic.
+- Added package-level test gate compatible with required workflow:
+  - `rushx test` now runs `dist` and then Jest unit tests (`test:unit`).
+- Added focused Jest unit coverage in `core/core.router.test.js`:
+  - verifies sync dispatch call-through,
+  - verifies explicit missing-service error path.
 
-## Next safe code targets (after minimal Jest+TS harness is added)
-- Add package scripts:
-  - `"test": "jest --runInBand"`
-  - `"test:watch": "jest --watch"` (optional)
-- Add minimal Jest TS support in-package (no ad-hoc npx):
-  - dev deps: `ts-jest`, `typescript`.
-  - `jest.config.ts` using `preset: 'ts-jest'`.
-- Then apply focused source improvements with tests:
-  - explicit context/service typing for `sync` dispatch,
-  - input schema validation edge tests (`kind`, `targets`, `reason`),
-  - dispatch/error-shape tests (`ctx.app.service.sync` invocation + thrown/missing service behavior).
+## Next safe code targets
+- Tighten `createRouter` typing for `service` and `ctx` without introducing abstraction layers.
+- Add schema edge-case tests for invalid `targets` and empty `reason` handling based on product expectations.
+- If future slots need TS-based tests directly against source, evaluate lightweight `ts-jest` adoption; current compiled-JS test path is sufficient for gate compliance.

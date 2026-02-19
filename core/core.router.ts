@@ -12,5 +12,13 @@ export const createRouter = (t: any) =>
           reason: z.string(),
         })
       )
-      .mutation(({ input, ctx }) => (ctx.app.service.sync as any)(input, ctx)),
+      .mutation(({ input, ctx }) => {
+        const sync = ctx?.app?.service?.sync;
+
+        if (typeof sync !== 'function') {
+          throw new Error('forge-protocol core.sync requires ctx.app.service.sync function');
+        }
+
+        return sync(input, ctx);
+      }),
   });

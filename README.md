@@ -3,7 +3,7 @@
 Forge protocol defines local/browser-executed tRPC procedure contracts used by Forge web (`forge.core.*`).
 
 ## Current status
-- Source analyzed in this run: `index.ts`, `core/core.router.ts`.
-- Source-change gate blocker remains active in this slot: package test tooling is not runnable in this environment (`jest: command not found`).
-- To keep gate compliance, this run is docs/analysis-only for protocol slot continuity.
-- `ANALYSIS.md` tracks minimal Jest+TS harness follow-ups before any source edits.
+- Source reviewed and updated in this run: `index.ts`, `core/core.router.ts`.
+- Added a runnable package test gate via `rushx test` (`dist` + Jest unit tests).
+- Added reliability guard in `core.sync` mutation to throw a clear error when `ctx.app.service.sync` is missing.
+- Added unit coverage in `core/core.router.test.js` for happy path and missing-service failure path.
