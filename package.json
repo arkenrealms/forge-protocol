@@ -6,7 +6,9 @@
     "clean": "del-cli ./build && make-dir ./build",
     "dist": "npm-run-all clean tsc:*",
     "publish": "npm publish --access=public",
-    "tsc:1": "rm -rf ./build && mkdir ./build && cp package.json ./build && NODE_ENV=production NODE_OPTIONS=--max-old-space-size=8192 tsc -p tsconfig.build.json --listFiles"
+    "tsc:1": "rm -rf ./build && mkdir ./build && cp package.json ./build && NODE_ENV=production NODE_OPTIONS=--max-old-space-size=8192 tsc -p tsconfig.build.json --listFiles",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch"
   },
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -33,6 +35,8 @@
     "dotenv": "^16"
   },
   "devDependencies": {
-    "del-cli": "^5"
+    "del-cli": "^5",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.3"
   }
 }

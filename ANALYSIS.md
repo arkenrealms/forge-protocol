@@ -5,21 +5,13 @@
 - Current live source footprint is minimal (`index.ts`, `core/core.router.ts`).
 
 ## Findings
-- `core/core.router.ts` defines a single `sync` mutation with broad `any` typing for `t`, `ctx`, and `service` dispatch.
-- `index.ts` exports router helpers and wires `core` namespace; typing is intentionally loose.
-- Gate verification in this run:
-  - `npm test` fails (`Missing script: "test"`).
-  - temporary local harness probe (`"test": "jest --runInBand --coverage=false"`) still fails with `jest: command not found` in this runtime, so it was reverted to keep mainline clean.
-- With no runnable package test command, source hardening is blocked by the source-change test gate for this slot.
+- `core/core.router.ts` now guards `ctx.app.service.sync` before invocation and throws a stable, explicit error (`forge.core.sync service is unavailable`) when missing.
+- Package now has runnable local test entrypoints via `rushx test` using a Jest+TS harness (`jest.config.js` with `ts-jest`).
+- Added regression tests for:
+  - successful dispatch to `ctx.app.service.sync(input, ctx)`
+  - missing sync handler error path.
 
-## Next safe code targets (after minimal Jest+TS harness is added)
-- Add package scripts:
-  - `"test": "jest --runInBand"`
-  - `"test:watch": "jest --watch"` (optional)
-- Add minimal Jest TS support in-package (no ad-hoc npx):
-  - dev deps: `ts-jest`, `typescript`.
-  - `jest.config.ts` using `preset: 'ts-jest'`.
-- Then apply focused source improvements with tests:
-  - explicit context/service typing for `sync` dispatch,
-  - input schema validation edge tests (`kind`, `targets`, `reason`),
-  - dispatch/error-shape tests (`ctx.app.service.sync` invocation + thrown/missing service behavior).
+## Next safe code targets
+- Reduce broad `any` usage in `index.ts` + `core/core.router.ts` by introducing a minimal typed app context shape.
+- Add schema-edge tests for invalid `targets` entries and empty `reason` handling once product expectations are confirmed.
+- Add build/test CI parity check in package docs (same command: `rushx test`).
