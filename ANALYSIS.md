@@ -5,21 +5,13 @@
 - Current live source footprint is minimal (`index.ts`, `core/core.router.ts`).
 
 ## Findings
-- `core/core.router.ts` defines a single `sync` mutation with broad `any` typing for `t`, `ctx`, and `service` dispatch.
-- `index.ts` exports router helpers and wires `core` namespace; typing is intentionally loose.
-- Gate verification in this run:
-  - `npm test` fails (`Missing script: "test"`).
-  - temporary local harness probe (`"test": "jest --runInBand --coverage=false"`) still fails with `jest: command not found` in this runtime, so it was reverted to keep mainline clean.
-- With no runnable package test command, source hardening is blocked by the source-change test gate for this slot.
+- `core/core.router.ts` defines a single `sync` mutation and now includes a runtime guard for missing `ctx.app.service.sync` before dispatch.
+- `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose.
+- Added runnable package test script: `"test": "jest --runInBand"`.
+- Added Jest coverage in `test/core.router.test.js` for:
+  - successful dispatch to `ctx.app.service.sync`,
+  - explicit failure message when the sync handler is missing.
 
-## Next safe code targets (after minimal Jest+TS harness is added)
-- Add package scripts:
-  - `"test": "jest --runInBand"`
-  - `"test:watch": "jest --watch"` (optional)
-- Add minimal Jest TS support in-package (no ad-hoc npx):
-  - dev deps: `ts-jest`, `typescript`.
-  - `jest.config.ts` using `preset: 'ts-jest'`.
-- Then apply focused source improvements with tests:
-  - explicit context/service typing for `sync` dispatch,
-  - input schema validation edge tests (`kind`, `targets`, `reason`),
-  - dispatch/error-shape tests (`ctx.app.service.sync` invocation + thrown/missing service behavior).
+## Next safe code targets
+- Tighten `ctx` typing for `core.sync` to reduce `any` usage without adding unnecessary abstraction.
+- Add schema-edge tests for invalid/empty `targets` and malformed `reason` payloads.
