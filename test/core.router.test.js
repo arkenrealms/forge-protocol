@@ -42,4 +42,24 @@ describe('forge protocol core.sync router', () => {
     );
     expect(sync).not.toHaveBeenCalled();
   });
+
+  test('rejects mixed target arrays with blank entries', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui', '   '], reason: 'manual' })).rejects.toThrow(
+      'target entry is required'
+    );
+    expect(sync).not.toHaveBeenCalled();
+  });
+
+  test('rejects unknown keys to avoid silent payload drift', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(
+      caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual', extra: 'field' })
+    ).rejects.toThrow('Unrecognized key(s) in object');
+    expect(sync).not.toHaveBeenCalled();
+  });
 });

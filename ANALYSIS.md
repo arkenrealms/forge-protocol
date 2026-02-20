@@ -9,6 +9,7 @@
   - rejects empty/whitespace `kind`,
   - rejects empty `targets` arrays and whitespace-only target entries,
   - rejects empty/whitespace `reason`,
+  - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing.
 - `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose.
 - Package test script remains `"test": "jest --runInBand"` and is runnable via `rushx test`.
