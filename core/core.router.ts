@@ -10,6 +10,18 @@ const createErrorWithCause = (message: string, cause: unknown) => {
 
 const containsControlChars = (value: string) => /[\u0000-\u001F\u007F]/.test(value);
 
+const describeValueType = (value: unknown) => {
+  if (value === null) {
+    return 'null';
+  }
+
+  if (Array.isArray(value)) {
+    return 'array';
+  }
+
+  return typeof value;
+};
+
 const createTrimmedSafeString = (fieldName: string, maxLength: number) =>
   z
     .string()
@@ -61,7 +73,9 @@ export const createRouter = (t: any) =>
         }
 
         if (typeof sync !== 'function') {
-          throw new Error('forge-protocol core.sync requires ctx.app.service.sync function');
+          throw new Error(
+            `forge-protocol core.sync requires ctx.app.service.sync function (received ${describeValueType(sync)})`
+          );
         }
 
         const normalizedInput = {

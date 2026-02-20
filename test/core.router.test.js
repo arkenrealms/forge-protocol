@@ -20,7 +20,15 @@ describe('forge protocol core.sync router', () => {
 
     await expect(
       caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })
-    ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function');
+    ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function (received undefined)');
+  });
+
+  test('surfaces the received sync handler type in missing-handler errors', async () => {
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: null } } });
+
+    await expect(
+      caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })
+    ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function (received null)');
   });
 
   test('throws a clear error when reading sync handler throws', async () => {

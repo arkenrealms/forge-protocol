@@ -13,7 +13,7 @@
   - rejects ASCII control characters in raw `kind`, target entries, and `reason` before trim-normalization to avoid hidden leading/trailing control-byte payload drift into sync services,
   - rejects empty/whitespace `reason` and caps length to 512 chars,
   - rejects unknown input keys via strict schema mode,
-  - throws a clear error when `ctx.app.service.sync` is missing,
+  - throws a clear error when `ctx.app.service.sync` is missing and includes the received runtime type (`undefined`, `null`, etc.) for faster configuration debugging,
   - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals) and preserves underlying throwable as `Error.cause` for debuggability,
   - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch,
   - catches non-`Error` throwables/rejections from `sync` and emits a stable protocol error to keep failure shape predictable for callers.
@@ -24,6 +24,7 @@
 ## Change rationale (2026-02-20)
 - Tightened control-character validation order so raw `kind`, `targets`, and `reason` are checked before trim-normalization; this closes a gap where leading/trailing control bytes (for example a trailing newline) could be trimmed away and accepted.
 - Preserved original throwables in `Error.cause` for accessor/read and non-Error sync failures so operators can inspect root cause without losing the stable protocol-facing error message.
+- Added explicit received-type diagnostics for missing/non-callable `ctx.app.service.sync` (including null/undefined) so environment misconfiguration can be identified directly from protocol errors without extra instrumentation.
 
 ## Next safe code targets
 - Tighten `ctx` typing for `core.sync` to reduce `any` usage without adding unnecessary abstraction.

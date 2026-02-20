@@ -1,7 +1,8 @@
 # arken/forge/protocol/test/ANALYSIS.md
 
 - Verifies `core.sync` dispatches to `ctx.app.service.sync` when payload is valid.
-- Verifies missing `sync` handler throws a clear, actionable error.
+- Verifies missing `sync` handler throws a clear, actionable error including the received runtime type.
+- Verifies missing-handler type diagnostics explicitly report `null` when `ctx.app.service.sync` is set to null.
 - Verifies sync-handler property accessor failures are converted into a stable protocol error while preserving the original exception in `Error.cause`.
 - Verifies schema rejects empty `targets` arrays.
 - Verifies schema rejects blank/whitespace `reason` values before service dispatch.
