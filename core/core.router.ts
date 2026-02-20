@@ -13,6 +13,21 @@ export const createRouter = (t: any) =>
             reason: z.string().trim().min(1, 'reason is required'),
           })
           .strict()
+          .superRefine((value, ctx) => {
+            const seen = new Set();
+            for (const target of value.targets) {
+              const normalizedTarget = target.trim();
+              if (seen.has(normalizedTarget)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: ['targets'],
+                  message: 'targets must be unique',
+                });
+                break;
+              }
+              seen.add(normalizedTarget);
+            }
+          })
       )
       .mutation(({ input, ctx }) => {
         const sync = (ctx as any)?.app?.service?.sync;

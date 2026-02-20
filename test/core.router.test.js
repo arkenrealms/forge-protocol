@@ -84,4 +84,14 @@ describe('forge protocol core.sync router', () => {
     ).rejects.toThrow('Unrecognized key(s) in object');
     expect(sync).not.toHaveBeenCalled();
   });
+
+  test('rejects duplicate targets after normalization', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(
+      caller.sync({ kind: 'refresh', targets: [' ui ', 'ui'], reason: 'manual' })
+    ).rejects.toThrow('targets must be unique');
+    expect(sync).not.toHaveBeenCalled();
+  });
 });

@@ -8,6 +8,7 @@
 - `core/core.router.ts` defines a single `sync` mutation with runtime guardrails:
   - rejects empty/whitespace `kind`,
   - rejects empty `targets` arrays and whitespace-only target entries,
+  - rejects duplicate `targets` after trim normalization,
   - rejects empty/whitespace `reason`,
   - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing,
