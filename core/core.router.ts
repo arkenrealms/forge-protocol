@@ -30,7 +30,13 @@ export const createRouter = (t: any) =>
           })
       )
       .mutation(({ input, ctx }) => {
-        const sync = (ctx as any)?.app?.service?.sync;
+        let sync: unknown;
+        try {
+          sync = (ctx as any)?.app?.service?.sync;
+        } catch {
+          throw new Error('forge-protocol core.sync could not read ctx.app.service.sync');
+        }
+
         if (typeof sync !== 'function') {
           throw new Error('forge-protocol core.sync requires ctx.app.service.sync function');
         }

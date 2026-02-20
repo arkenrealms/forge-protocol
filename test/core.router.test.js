@@ -23,6 +23,21 @@ describe('forge protocol core.sync router', () => {
     ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function');
   });
 
+  test('throws a clear error when reading sync handler throws', async () => {
+    const service = {};
+    Object.defineProperty(service, 'sync', {
+      get() {
+        throw new Error('sync getter exploded');
+      },
+    });
+
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'forge-protocol core.sync could not read ctx.app.service.sync'
+    );
+  });
+
   test('rejects empty targets payloads', async () => {
     const sync = jest.fn();
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });

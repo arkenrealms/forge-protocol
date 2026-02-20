@@ -12,6 +12,7 @@
   - rejects empty/whitespace `reason`,
   - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing,
+  - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals),
   - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch.
 - `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose.
 - Package test script remains `"test": "jest --runInBand"` and is runnable via `rushx test`.
