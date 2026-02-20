@@ -10,35 +10,30 @@ const createErrorWithCause = (message: string, cause: unknown) => {
 
 const containsControlChars = (value: string) => /[\u0000-\u001F\u007F]/.test(value);
 
+const createTrimmedSafeString = (fieldName: string, maxLength: number) =>
+  z
+    .string()
+    .refine((value) => !containsControlChars(value), `${fieldName} must not contain control characters`)
+    .transform((value) => value.trim())
+    .pipe(
+      z
+        .string()
+        .min(1, `${fieldName} is required`)
+        .max(maxLength, `${fieldName} must be at most ${maxLength} characters`)
+    );
+
 export const createRouter = (t: any) =>
   t.router({
     sync: t.procedure
       .input(
         z
           .object({
-            kind: z
-              .string()
-              .trim()
-              .min(1, 'kind is required')
-              .max(128, 'kind must be at most 128 characters')
-              .refine((value) => !containsControlChars(value), 'kind must not contain control characters'),
+            kind: createTrimmedSafeString('kind', 128),
             targets: z
-              .array(
-                z
-                  .string()
-                  .trim()
-                  .min(1, 'target entry is required')
-                  .max(128, 'target entry must be at most 128 characters')
-                  .refine((value) => !containsControlChars(value), 'target entry must not contain control characters')
-              )
+              .array(createTrimmedSafeString('target entry', 128))
               .min(1, 'at least one target is required')
               .max(64, 'at most 64 targets are allowed'),
-            reason: z
-              .string()
-              .trim()
-              .min(1, 'reason is required')
-              .max(512, 'reason must be at most 512 characters')
-              .refine((value) => !containsControlChars(value), 'reason must not contain control characters'),
+            reason: createTrimmedSafeString('reason', 512),
           })
           .strict()
           .superRefine((value, ctx) => {

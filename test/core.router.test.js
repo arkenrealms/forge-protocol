@@ -151,6 +151,16 @@ describe('forge protocol core.sync router', () => {
     expect(sync).not.toHaveBeenCalled();
   });
 
+  test('rejects kind values containing control characters even when trimmable', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: '\nrefresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'kind must not contain control characters'
+    );
+    expect(sync).not.toHaveBeenCalled();
+  });
+
   test('rejects target entries containing control characters', async () => {
     const sync = jest.fn();
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
@@ -166,6 +176,16 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
     await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual\nops' })).rejects.toThrow(
+      'reason must not contain control characters'
+    );
+    expect(sync).not.toHaveBeenCalled();
+  });
+
+  test('rejects reason values with trailing control characters that trim would otherwise remove', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual\n' })).rejects.toThrow(
       'reason must not contain control characters'
     );
     expect(sync).not.toHaveBeenCalled();
