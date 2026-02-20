@@ -13,7 +13,8 @@
   - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing,
   - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals),
-  - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch.
+  - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch,
+  - catches non-`Error` throwables/rejections from `sync` and emits a stable protocol error to keep failure shape predictable for callers.
 - `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose.
 - Package test script remains `"test": "jest --runInBand"` and is runnable via `rushx test`.
 - `test/core.router.test.js` now covers both dispatch behavior and schema-level rejection paths.

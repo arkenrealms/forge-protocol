@@ -29,7 +29,7 @@ export const createRouter = (t: any) =>
             }
           })
       )
-      .mutation(({ input, ctx }) => {
+      .mutation(async ({ input, ctx }) => {
         let sync: unknown;
         try {
           sync = (ctx as any)?.app?.service?.sync;
@@ -47,6 +47,14 @@ export const createRouter = (t: any) =>
           reason: input.reason.trim(),
         };
 
-        return sync(normalizedInput, ctx);
+        try {
+          return await Promise.resolve(sync(normalizedInput, ctx));
+        } catch (error) {
+          if (error instanceof Error) {
+            throw error;
+          }
+
+          throw new Error('forge-protocol core.sync failed with non-error throwable');
+        }
       }),
   });

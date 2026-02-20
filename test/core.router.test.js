@@ -109,4 +109,24 @@ describe('forge protocol core.sync router', () => {
     ).rejects.toThrow('targets must be unique');
     expect(sync).not.toHaveBeenCalled();
   });
+
+  test('converts sync throws of non-Error values into a stable protocol error', async () => {
+    const sync = jest.fn(() => {
+      throw 'sync exploded';
+    });
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'forge-protocol core.sync failed with non-error throwable'
+    );
+  });
+
+  test('converts sync rejections of non-Error values into a stable protocol error', async () => {
+    const sync = jest.fn().mockRejectedValue(42);
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'forge-protocol core.sync failed with non-error throwable'
+    );
+  });
 });
