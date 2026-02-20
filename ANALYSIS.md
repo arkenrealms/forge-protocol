@@ -5,13 +5,15 @@
 - Current live source footprint is minimal (`index.ts`, `core/core.router.ts`).
 
 ## Findings
-- `core/core.router.ts` defines a single `sync` mutation and now includes a runtime guard for missing `ctx.app.service.sync` before dispatch.
+- `core/core.router.ts` defines a single `sync` mutation with runtime guardrails:
+  - rejects empty/whitespace `kind`,
+  - rejects empty `targets` arrays and whitespace-only target entries,
+  - rejects empty/whitespace `reason`,
+  - throws a clear error when `ctx.app.service.sync` is missing.
 - `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose.
-- Added runnable package test script: `"test": "jest --runInBand"`.
-- Added Jest coverage in `test/core.router.test.js` for:
-  - successful dispatch to `ctx.app.service.sync`,
-  - explicit failure message when the sync handler is missing.
+- Package test script remains `"test": "jest --runInBand"` and is runnable via `rushx test`.
+- `test/core.router.test.js` now covers both dispatch behavior and schema-level rejection paths.
 
 ## Next safe code targets
 - Tighten `ctx` typing for `core.sync` to reduce `any` usage without adding unnecessary abstraction.
-- Add schema-edge tests for invalid/empty `targets` and malformed `reason` payloads.
+- Add schema tests for `kind` normalization edge-cases and mixed valid/invalid `targets` arrays.

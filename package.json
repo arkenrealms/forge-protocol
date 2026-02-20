@@ -2,9 +2,9 @@
   "name": "@arken/forge-protocol",
   "version": "0.1.6",
   "scripts": {
-    "build": "npm-run-all dist",
+    "build": "npm run dist",
     "clean": "del-cli ./build && make-dir ./build",
-    "dist": "npm-run-all clean tsc:*",
+    "dist": "npm run clean && npm run tsc:1",
     "test": "jest --runInBand",
     "publish": "npm publish --access=public",
     "tsc:1": "rm -rf ./build && mkdir ./build && cp package.json ./build && NODE_ENV=production NODE_OPTIONS=--max-old-space-size=8192 tsc -p tsconfig.build.json --listFiles"
