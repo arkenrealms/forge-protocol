@@ -8,10 +8,11 @@ Forge protocol defines local/browser-executed tRPC procedure contracts used by F
   - `targets` must contain 1..64 entries,
   - each `targets` entry must be non-empty after trim and at most 128 chars,
   - `reason` must be non-empty and at most 512 chars,
+  - `kind` / each `targets` entry / `reason` reject ASCII control chars (e.g., `\n`, `\t`) to keep sync payloads transport-safe,
   - unexpected/unknown payload keys are rejected (`.strict()`).
 - Router guards missing `ctx.app.service.sync` and throws a clear error before dispatch.
 - Router now also guards property-accessor failures while reading `ctx.app.service.sync`, replacing opaque getter exceptions with a stable actionable error while preserving original throwable via `Error.cause` for debugging.
 - Router now normalizes whitespace-trimmed `kind`/`targets`/`reason` into a clean dispatch payload before invoking `sync`, preventing whitespace drift into service handlers.
 - Router rejects duplicate `targets` after trim normalization, preventing duplicate downstream sync execution for the same logical target.
 - Router normalizes non-`Error` throwables/rejections from `ctx.app.service.sync` into a stable protocol error, preventing raw string/number throwables from leaking through the tRPC surface.
-- Jest coverage in `test/core.router.test.js` includes schema-rejection and normalization cases (empty targets, blank kind/reason, mixed target arrays, unknown keys, duplicate targets, dispatch payload normalization, non-Error throwable/rejection normalization).
+- Jest coverage in `test/core.router.test.js` includes schema-rejection and normalization cases (empty targets, blank kind/reason, mixed target arrays, unknown keys, duplicate targets, dispatch payload normalization, non-Error throwable/rejection normalization, control-character rejection).

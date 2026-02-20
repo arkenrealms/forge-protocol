@@ -10,6 +10,7 @@
   - rejects empty `targets` arrays, arrays above 64 entries, and whitespace-only target entries,
   - rejects overlong target entries (>128 chars),
   - rejects duplicate `targets` after trim normalization,
+  - rejects ASCII control characters in `kind`, target entries, and `reason` to avoid multi-line/control-byte payload drift into sync services,
   - rejects empty/whitespace `reason` and caps length to 512 chars,
   - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing,
@@ -21,6 +22,7 @@
 - `test/core.router.test.js` now covers both dispatch behavior and schema-level rejection paths.
 
 ## Change rationale (2026-02-20)
+- Added control-character validation for `kind`, `targets`, and `reason` after seeing that newline/tab payloads can bypass basic trim+length checks and cause downstream log/transport ambiguity.
 - Preserved original throwables in `Error.cause` for accessor/read and non-Error sync failures so operators can inspect root cause without losing the stable protocol-facing error message.
 
 ## Next safe code targets

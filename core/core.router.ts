@@ -8,18 +8,37 @@ const createErrorWithCause = (message: string, cause: unknown) => {
   return error;
 };
 
+const containsControlChars = (value: string) => /[\u0000-\u001F\u007F]/.test(value);
+
 export const createRouter = (t: any) =>
   t.router({
     sync: t.procedure
       .input(
         z
           .object({
-            kind: z.string().trim().min(1, 'kind is required').max(128, 'kind must be at most 128 characters'),
+            kind: z
+              .string()
+              .trim()
+              .min(1, 'kind is required')
+              .max(128, 'kind must be at most 128 characters')
+              .refine((value) => !containsControlChars(value), 'kind must not contain control characters'),
             targets: z
-              .array(z.string().trim().min(1, 'target entry is required').max(128, 'target entry must be at most 128 characters'))
+              .array(
+                z
+                  .string()
+                  .trim()
+                  .min(1, 'target entry is required')
+                  .max(128, 'target entry must be at most 128 characters')
+                  .refine((value) => !containsControlChars(value), 'target entry must not contain control characters')
+              )
               .min(1, 'at least one target is required')
               .max(64, 'at most 64 targets are allowed'),
-            reason: z.string().trim().min(1, 'reason is required').max(512, 'reason must be at most 512 characters'),
+            reason: z
+              .string()
+              .trim()
+              .min(1, 'reason is required')
+              .max(512, 'reason must be at most 512 characters')
+              .refine((value) => !containsControlChars(value), 'reason must not contain control characters'),
           })
           .strict()
           .superRefine((value, ctx) => {
