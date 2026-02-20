@@ -19,6 +19,13 @@ export const createRouter = (t: any) =>
         if (typeof sync !== 'function') {
           throw new Error('forge-protocol core.sync requires ctx.app.service.sync function');
         }
-        return sync(input, ctx);
+
+        const normalizedInput = {
+          kind: input.kind.trim(),
+          targets: input.targets.map((target) => target.trim()),
+          reason: input.reason.trim(),
+        };
+
+        return sync(normalizedInput, ctx);
       }),
   });

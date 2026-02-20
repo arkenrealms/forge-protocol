@@ -10,7 +10,8 @@
   - rejects empty `targets` arrays and whitespace-only target entries,
   - rejects empty/whitespace `reason`,
   - rejects unknown input keys via strict schema mode,
-  - throws a clear error when `ctx.app.service.sync` is missing.
+  - throws a clear error when `ctx.app.service.sync` is missing,
+  - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch.
 - `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose.
 - Package test script remains `"test": "jest --runInBand"` and is runnable via `rushx test`.
 - `test/core.router.test.js` now covers both dispatch behavior and schema-level rejection paths.

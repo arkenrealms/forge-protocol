@@ -9,5 +9,6 @@ Forge protocol defines local/browser-executed tRPC procedure contracts used by F
   - each `targets` entry must be non-empty after trim,
   - `reason` must be non-empty,
   - unexpected/unknown payload keys are rejected (`.strict()`).
-- Router still guards missing `ctx.app.service.sync` and throws a clear error before dispatch.
-- Jest coverage in `test/core.router.test.js` includes schema-rejection cases (empty targets, blank reason, mixed target arrays, unknown keys) to prevent invalid payloads from reaching service handlers.
+- Router guards missing `ctx.app.service.sync` and throws a clear error before dispatch.
+- Router now normalizes whitespace-trimmed `kind`/`targets`/`reason` into a clean dispatch payload before invoking `sync`, preventing whitespace drift into service handlers.
+- Jest coverage in `test/core.router.test.js` includes schema-rejection and normalization cases (empty targets, blank kind/reason, mixed target arrays, unknown keys, dispatch payload normalization).

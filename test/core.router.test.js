@@ -53,6 +53,28 @@ describe('forge protocol core.sync router', () => {
     expect(sync).not.toHaveBeenCalled();
   });
 
+  test('normalizes whitespace around payload fields before dispatch', async () => {
+    const sync = jest.fn().mockResolvedValue({ ok: true });
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(
+      caller.sync({ kind: '  refresh  ', targets: [' ui ', ' jobs '], reason: ' manual  ' })
+    ).resolves.toEqual({ ok: true });
+
+    expect(sync).toHaveBeenCalledWith(
+      { kind: 'refresh', targets: ['ui', 'jobs'], reason: 'manual' },
+      expect.any(Object)
+    );
+  });
+
+  test('rejects kind values that become empty after trimming', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: '   ', targets: ['ui'], reason: 'manual' })).rejects.toThrow('kind is required');
+    expect(sync).not.toHaveBeenCalled();
+  });
+
   test('rejects unknown keys to avoid silent payload drift', async () => {
     const sync = jest.fn();
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
