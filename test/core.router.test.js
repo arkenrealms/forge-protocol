@@ -33,9 +33,10 @@ describe('forge protocol core.sync router', () => {
 
     const caller = t.createCallerFactory(createRouter(t))({ app: { service } });
 
-    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
-      'forge-protocol core.sync could not read ctx.app.service.sync'
-    );
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toMatchObject({
+      message: 'forge-protocol core.sync could not read ctx.app.service.sync',
+      cause: expect.any(Error),
+    });
   });
 
   test('rejects empty targets payloads', async () => {
@@ -156,17 +157,27 @@ describe('forge protocol core.sync router', () => {
     });
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
-    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
-      'forge-protocol core.sync failed with non-error throwable'
-    );
+    try {
+      await caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' });
+      throw new Error('expected sync call to reject');
+    } catch (error) {
+      expect(error.cause).toBeInstanceOf(Error);
+      expect(error.cause.message).toBe('forge-protocol core.sync failed with non-error throwable');
+      expect(error.cause.cause).toBe('sync exploded');
+    }
   });
 
   test('converts sync rejections of non-Error values into a stable protocol error', async () => {
     const sync = jest.fn().mockRejectedValue(42);
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
-    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
-      'forge-protocol core.sync failed with non-error throwable'
-    );
+    try {
+      await caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' });
+      throw new Error('expected sync call to reject');
+    } catch (error) {
+      expect(error.cause).toBeInstanceOf(Error);
+      expect(error.cause.message).toBe('forge-protocol core.sync failed with non-error throwable');
+      expect(error.cause.cause).toBe(42);
+    }
   });
 });

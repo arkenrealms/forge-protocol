@@ -2,6 +2,12 @@
 //
 import { z } from 'zod';
 
+const createErrorWithCause = (message: string, cause: unknown) => {
+  const error = new Error(message) as Error & { cause?: unknown };
+  error.cause = cause;
+  return error;
+};
+
 export const createRouter = (t: any) =>
   t.router({
     sync: t.procedure
@@ -36,8 +42,8 @@ export const createRouter = (t: any) =>
         let sync: unknown;
         try {
           sync = (ctx as any)?.app?.service?.sync;
-        } catch {
-          throw new Error('forge-protocol core.sync could not read ctx.app.service.sync');
+        } catch (error) {
+          throw createErrorWithCause('forge-protocol core.sync could not read ctx.app.service.sync', error);
         }
 
         if (typeof sync !== 'function') {
@@ -57,7 +63,7 @@ export const createRouter = (t: any) =>
             throw error;
           }
 
-          throw new Error('forge-protocol core.sync failed with non-error throwable');
+          throw createErrorWithCause('forge-protocol core.sync failed with non-error throwable', error);
         }
       }),
   });
