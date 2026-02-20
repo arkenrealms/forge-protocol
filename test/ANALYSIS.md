@@ -8,6 +8,10 @@
 - Verifies schema rejects mixed valid/blank `targets` arrays.
 - Verifies schema rejects unknown keys to prevent silent payload drift.
 - Verifies schema rejects duplicate targets after trim normalization.
+- Verifies schema rejects oversized `kind` values (>128 chars).
+- Verifies schema rejects oversized target entries (>128 chars).
+- Verifies schema rejects oversized target arrays (>64 entries).
+- Verifies schema rejects oversized `reason` values (>512 chars).
 - Verifies dispatch payload is normalized (trimmed) before reaching the sync service.
 - Verifies whitespace-only `kind` is rejected before service dispatch.
 - Verifies non-`Error` sync throwables are normalized into a stable protocol error.

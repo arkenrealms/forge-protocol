@@ -110,6 +110,46 @@ describe('forge protocol core.sync router', () => {
     expect(sync).not.toHaveBeenCalled();
   });
 
+  test('rejects oversized kind values', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'k'.repeat(129), targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'kind must be at most 128 characters'
+    );
+    expect(sync).not.toHaveBeenCalled();
+  });
+
+  test('rejects oversized target entries', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['t'.repeat(129)], reason: 'manual' })).rejects.toThrow(
+      'target entry must be at most 128 characters'
+    );
+    expect(sync).not.toHaveBeenCalled();
+  });
+
+  test('rejects oversized target arrays', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(
+      caller.sync({ kind: 'refresh', targets: Array.from({ length: 65 }, (_, index) => `target-${index}`), reason: 'manual' })
+    ).rejects.toThrow('at most 64 targets are allowed');
+    expect(sync).not.toHaveBeenCalled();
+  });
+
+  test('rejects oversized reason values', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'r'.repeat(513) })).rejects.toThrow(
+      'reason must be at most 512 characters'
+    );
+    expect(sync).not.toHaveBeenCalled();
+  });
+
   test('converts sync throws of non-Error values into a stable protocol error', async () => {
     const sync = jest.fn(() => {
       throw 'sync exploded';

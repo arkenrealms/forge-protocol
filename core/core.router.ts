@@ -8,9 +8,12 @@ export const createRouter = (t: any) =>
       .input(
         z
           .object({
-            kind: z.string().trim().min(1, 'kind is required'),
-            targets: z.array(z.string().trim().min(1, 'target entry is required')).min(1, 'at least one target is required'),
-            reason: z.string().trim().min(1, 'reason is required'),
+            kind: z.string().trim().min(1, 'kind is required').max(128, 'kind must be at most 128 characters'),
+            targets: z
+              .array(z.string().trim().min(1, 'target entry is required').max(128, 'target entry must be at most 128 characters'))
+              .min(1, 'at least one target is required')
+              .max(64, 'at most 64 targets are allowed'),
+            reason: z.string().trim().min(1, 'reason is required').max(512, 'reason must be at most 512 characters'),
           })
           .strict()
           .superRefine((value, ctx) => {

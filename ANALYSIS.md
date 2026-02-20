@@ -6,10 +6,11 @@
 
 ## Findings
 - `core/core.router.ts` defines a single `sync` mutation with runtime guardrails:
-  - rejects empty/whitespace `kind`,
-  - rejects empty `targets` arrays and whitespace-only target entries,
+  - rejects empty/whitespace `kind` and caps length to 128 chars,
+  - rejects empty `targets` arrays, arrays above 64 entries, and whitespace-only target entries,
+  - rejects overlong target entries (>128 chars),
   - rejects duplicate `targets` after trim normalization,
-  - rejects empty/whitespace `reason`,
+  - rejects empty/whitespace `reason` and caps length to 512 chars,
   - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing,
   - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals),

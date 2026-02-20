@@ -4,10 +4,10 @@ Forge protocol defines local/browser-executed tRPC procedure contracts used by F
 
 ## Current status
 - `core/core.router.ts` validates sync payloads more defensively:
-  - `kind` must be non-empty,
-  - `targets` must contain at least one non-empty entry,
-  - each `targets` entry must be non-empty after trim,
-  - `reason` must be non-empty,
+  - `kind` must be non-empty and at most 128 chars,
+  - `targets` must contain 1..64 entries,
+  - each `targets` entry must be non-empty after trim and at most 128 chars,
+  - `reason` must be non-empty and at most 512 chars,
   - unexpected/unknown payload keys are rejected (`.strict()`).
 - Router guards missing `ctx.app.service.sync` and throws a clear error before dispatch.
 - Router now also guards property-accessor failures while reading `ctx.app.service.sync`, replacing opaque getter exceptions with a stable actionable error.
