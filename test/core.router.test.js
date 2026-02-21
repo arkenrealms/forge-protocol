@@ -339,4 +339,32 @@ describe('forge protocol core.sync router', () => {
       expect(error.cause.cause).toBe(42);
     }
   });
+
+  test('falls back to uninspectable-name diagnostics when class handler name access throws', async () => {
+    const classSync = class SyncHandler {};
+    const unstableClassSync = new Proxy(classSync, {
+      get(target, property, receiver) {
+        if (property === 'name') {
+          throw new Error('name getter exploded');
+        }
+
+        return Reflect.get(target, property, receiver);
+      },
+    });
+
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: unstableClassSync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'forge-protocol core.sync requires invokable ctx.app.service.sync function (received function:uninspectable-name)'
+    );
+  });
+
+  test('tolerates revoked proxy sync handlers without crashing class detection', async () => {
+    const { proxy: revokedSync, revoke } = Proxy.revocable(() => ({ ok: true }), {});
+    revoke();
+
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: revokedSync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow();
+  });
 });

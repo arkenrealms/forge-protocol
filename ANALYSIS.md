@@ -28,6 +28,8 @@
 - Rejected class constructors as non-invokable sync handlers so `core.sync` fails fast with a stable configuration error before runtime invocation throws `Class constructor ... cannot be invoked without 'new'`.
 - Expanded missing-handler diagnostics to include named-function detail (`function:<name>`) so operator triage can distinguish plain callable functions from class-constructor wiring mistakes.
 - Clarified validation error text from `control characters` to `control/format characters` so operator-facing failures match the actual `Cc` + `Cf` rejection behavior already enforced in code and tests.
+- Hardened function-type diagnostics so if reading a handler's `.name` throws (proxy/getter edge cases), the router still reports a stable `function:uninspectable-name` type instead of crashing while constructing an error message.
+- Hardened class-constructor detection so `Function.prototype.toString` inspection failures (for example revoked proxies) no longer crash routing logic before normal handler invocation/error flow.
 
 ## Change rationale (2026-02-20)
 - Tightened control-character validation order so raw `kind`, `targets`, and `reason` are checked before trim-normalization; this closes a gap where leading/trailing control bytes (for example a trailing newline) could be trimmed away and accepted.

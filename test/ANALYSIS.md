@@ -26,3 +26,5 @@
 - Verifies leading/trailing control characters are rejected before trim-normalization (for example kind/reason values that would otherwise become valid after trim).
 - Verifies C1 Unicode control characters (for example `\u0085`) are rejected in target entries so non-ASCII control bytes cannot bypass router validation.
 - Verifies Unicode format control characters (for example zero-width space `\u200B`) are rejected in `kind` so invisible payload bytes cannot bypass validation.
+- Verifies class-constructor missing-handler diagnostics fall back to `function:uninspectable-name` when function-name inspection throws.
+- Verifies revoked proxy sync handlers do not crash class-constructor detection and still fail through normal invocation error flow.

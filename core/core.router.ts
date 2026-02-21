@@ -30,9 +30,13 @@ const describeValueType = (value: unknown) => {
 
   const primitiveType = typeof value;
   if (primitiveType === 'function') {
-    const rawName = (value as { name?: unknown })?.name;
-    const fnName = typeof rawName === 'string' ? sanitizeTypeDetail(rawName) : 'unknown';
-    return fnName === 'unknown' ? 'function' : `function:${fnName}`;
+    try {
+      const rawName = (value as { name?: unknown })?.name;
+      const fnName = typeof rawName === 'string' ? sanitizeTypeDetail(rawName) : 'unknown';
+      return fnName === 'unknown' ? 'function' : `function:${fnName}`;
+    } catch {
+      return 'function:uninspectable-name';
+    }
   }
 
   if (primitiveType !== 'object') {
@@ -56,8 +60,25 @@ const isClassConstructor = (value: unknown) => {
     return false;
   }
 
-  const source = Function.prototype.toString.call(value);
-  return /^class\s/.test(source);
+  try {
+    const source = Function.prototype.toString.call(value);
+    if (/^class\s/.test(source)) {
+      return true;
+    }
+  } catch {
+    // ignore source inspection failures and continue with descriptor heuristics
+  }
+
+  try {
+    const prototypeDescriptor = Object.getOwnPropertyDescriptor(value, 'prototype');
+    if (prototypeDescriptor && prototypeDescriptor.writable === false) {
+      return true;
+    }
+  } catch {
+    // ignore descriptor inspection failures
+  }
+
+  return false;
 };
 
 const isInvokableSyncHandler = (value: unknown): value is (input: unknown, ctx: unknown) => unknown =>
