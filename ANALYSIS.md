@@ -18,7 +18,7 @@
   - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals) and preserves underlying throwable as `Error.cause` for debuggability,
   - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch,
   - normalizes `kind`/`targets`/`reason` to Unicode NFC for stable canonical payload representation,
-  - catches non-`Error` throwables/rejections from `sync` and emits a stable protocol error to keep failure shape predictable for callers.
+  - catches non-`Error` throwables/rejections from `sync` and emits a stable protocol error with received throwable type details (`string`, `number`, etc.) to keep failure shape predictable while improving operator diagnostics.
 - `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose.
 - Package test script now runs `"test": "npm run dist && jest --runInBand"` so tests always execute against freshly built output and cannot drift from source edits; runnable via `rushx test`.
 - `test/core.router.test.js` now covers both dispatch behavior and schema-level rejection paths.
@@ -30,6 +30,7 @@
 - Added NFC Unicode normalization for payload strings so canonically equivalent text (for example `café` vs `cafe\u0301`) is dispatched consistently and duplicate-target detection remains reliable across composition forms.
 - Updated the package test pipeline to build before Jest, preventing stale `build/` artifacts from masking source-level router changes during maintenance runs.
 - Preserved original throwables in `Error.cause` for accessor/read and non-Error sync failures so operators can inspect root cause without losing the stable protocol-facing error message.
+- Added received-type diagnostics to non-Error sync failure messages (`received string`, `received number`, etc.) so production triage can identify bad throw/reject patterns without spelunking stack traces.
 - Added explicit received-type diagnostics for missing/non-callable `ctx.app.service.sync` (including null/undefined) so environment misconfiguration can be identified directly from protocol errors without extra instrumentation.
 - Expanded missing-handler diagnostics to include constructor-aware object labels (for example `object:Object`) so non-callable object wiring mistakes can be triaged quickly without additional local logging.
 - Hardened diagnostic type rendering so if a malformed/proxy-like `sync` object throws when reading `.constructor`, the router still returns a stable missing-handler error (`object:uninspectable-constructor`) instead of failing during error-message construction.

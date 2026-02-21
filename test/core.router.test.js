@@ -277,7 +277,9 @@ describe('forge protocol core.sync router', () => {
       throw new Error('expected sync call to reject');
     } catch (error) {
       expect(error.cause).toBeInstanceOf(Error);
-      expect(error.cause.message).toBe('forge-protocol core.sync failed with non-error throwable');
+      expect(error.cause.message).toBe(
+        'forge-protocol core.sync failed with non-error throwable (received string)'
+      );
       expect(error.cause.cause).toBe('sync exploded');
     }
   });
@@ -291,7 +293,9 @@ describe('forge protocol core.sync router', () => {
       throw new Error('expected sync call to reject');
     } catch (error) {
       expect(error.cause).toBeInstanceOf(Error);
-      expect(error.cause.message).toBe('forge-protocol core.sync failed with non-error throwable');
+      expect(error.cause.message).toBe(
+        'forge-protocol core.sync failed with non-error throwable (received number)'
+      );
       expect(error.cause.cause).toBe(42);
     }
   });

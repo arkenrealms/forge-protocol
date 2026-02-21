@@ -93,7 +93,10 @@ export const createRouter = (t: any) =>
             throw error;
           }
 
-          throw createErrorWithCause('forge-protocol core.sync failed with non-error throwable', error);
+          throw createErrorWithCause(
+            `forge-protocol core.sync failed with non-error throwable (received ${describeValueType(error)})`,
+            error
+          );
         }
       }),
   });
