@@ -10,7 +10,7 @@
   - rejects empty `targets` arrays, arrays above 64 entries, and whitespace-only target entries,
   - rejects overlong target entries (>128 chars),
   - rejects duplicate `targets` after trim normalization,
-  - rejects Unicode control characters (`Cc`) in raw `kind`, target entries, and `reason` before trim-normalization to avoid hidden leading/trailing control-byte payload drift into sync services,
+  - rejects Unicode control/format characters (`Cc` + `Cf`) in raw `kind`, target entries, and `reason` before trim-normalization to avoid hidden payload drift (including invisible format chars) into sync services,
   - rejects empty/whitespace `reason` and caps length to 512 chars,
   - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing and includes the received runtime type (`undefined`, `null`, etc.) for faster configuration debugging,
@@ -24,6 +24,7 @@
 ## Change rationale (2026-02-20)
 - Tightened control-character validation order so raw `kind`, `targets`, and `reason` are checked before trim-normalization; this closes a gap where leading/trailing control bytes (for example a trailing newline) could be trimmed away and accepted.
 - Expanded control-character coverage from ASCII-only to full Unicode `Cc` controls so C1 bytes (for example `\u0085`) cannot bypass payload/log safety checks.
+- Extended validation to Unicode format controls (`Cf`, for example zero-width space `\u200B`) so invisible characters cannot bypass payload/log safety checks.
 - Updated the package test pipeline to build before Jest, preventing stale `build/` artifacts from masking source-level router changes during maintenance runs.
 - Preserved original throwables in `Error.cause` for accessor/read and non-Error sync failures so operators can inspect root cause without losing the stable protocol-facing error message.
 - Added explicit received-type diagnostics for missing/non-callable `ctx.app.service.sync` (including null/undefined) so environment misconfiguration can be identified directly from protocol errors without extra instrumentation.
