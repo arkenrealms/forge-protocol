@@ -91,6 +91,18 @@ describe('forge protocol core.sync router', () => {
     );
   });
 
+  test('normalizes Unicode canonically equivalent payload text before dispatch', async () => {
+    const sync = jest.fn().mockResolvedValue({ ok: true });
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 're\u0301fresh', targets: ['ui'], reason: 'manu\u0301al' })).resolves.toEqual({ ok: true });
+
+    expect(sync).toHaveBeenCalledWith(
+      { kind: 'réfresh', targets: ['ui'], reason: 'manúal'.normalize('NFC') },
+      expect.any(Object)
+    );
+  });
+
   test('rejects kind values that become empty after trimming', async () => {
     const sync = jest.fn();
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
@@ -116,6 +128,16 @@ describe('forge protocol core.sync router', () => {
     await expect(
       caller.sync({ kind: 'refresh', targets: [' ui ', 'ui'], reason: 'manual' })
     ).rejects.toThrow('targets must be unique');
+    expect(sync).not.toHaveBeenCalled();
+  });
+
+  test('rejects canonically equivalent Unicode targets as duplicates', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['caf\u00E9', 'cafe\u0301'], reason: 'manual' })).rejects.toThrow(
+      'targets must be unique'
+    );
     expect(sync).not.toHaveBeenCalled();
   });
 

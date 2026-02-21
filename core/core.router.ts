@@ -26,7 +26,7 @@ const createTrimmedSafeString = (fieldName: string, maxLength: number) =>
   z
     .string()
     .refine((value) => !containsControlChars(value), `${fieldName} must not contain control characters`)
-    .transform((value) => value.trim())
+    .transform((value) => value.trim().normalize('NFC'))
     .pipe(
       z
         .string()

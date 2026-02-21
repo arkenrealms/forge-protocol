@@ -13,7 +13,7 @@
 - Verifies schema rejects oversized target entries (>128 chars).
 - Verifies schema rejects oversized target arrays (>64 entries).
 - Verifies schema rejects oversized `reason` values (>512 chars).
-- Verifies dispatch payload is normalized (trimmed) before reaching the sync service.
+- Verifies dispatch payload is normalized (trimmed + Unicode NFC) before reaching the sync service.
 - Verifies whitespace-only `kind` is rejected before service dispatch.
 - Verifies non-`Error` sync throwables are normalized into a stable protocol error.
 - Verifies non-`Error` async sync rejections are normalized into a stable protocol error.

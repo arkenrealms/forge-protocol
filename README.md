@@ -13,6 +13,7 @@ Forge protocol defines local/browser-executed tRPC procedure contracts used by F
 - Router guards missing `ctx.app.service.sync` and throws a clear error before dispatch, including the received runtime type (for example `undefined`/`null`) to speed misconfiguration triage.
 - Router now also guards property-accessor failures while reading `ctx.app.service.sync`, replacing opaque getter exceptions with a stable actionable error while preserving original throwable via `Error.cause` for debugging.
 - Router now normalizes whitespace-trimmed `kind`/`targets`/`reason` into a clean dispatch payload before invoking `sync`, preventing whitespace drift into service handlers.
-- Router rejects duplicate `targets` after trim normalization, preventing duplicate downstream sync execution for the same logical target.
+- Router now also normalizes those strings to Unicode NFC so canonically equivalent input values dispatch consistently.
+- Router rejects duplicate `targets` after trim + Unicode normalization, preventing duplicate downstream sync execution for the same logical target.
 - Router normalizes non-`Error` throwables/rejections from `ctx.app.service.sync` into a stable protocol error, preventing raw string/number throwables from leaking through the tRPC surface.
 - Jest coverage in `test/core.router.test.js` includes schema-rejection and normalization cases (empty targets, blank kind/reason, mixed target arrays, unknown keys, duplicate targets, dispatch payload normalization, non-Error throwable/rejection normalization, control-character rejection).
