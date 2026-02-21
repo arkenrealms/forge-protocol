@@ -199,6 +199,16 @@ describe('forge protocol core.sync router', () => {
     expect(sync).not.toHaveBeenCalled();
   });
 
+  test('rejects C1 unicode control characters in target entries', async () => {
+    const sync = jest.fn();
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui\u0085panel'], reason: 'manual' })).rejects.toThrow(
+      'target entry must not contain control characters'
+    );
+    expect(sync).not.toHaveBeenCalled();
+  });
+
   test('converts sync throws of non-Error values into a stable protocol error', async () => {
     const sync = jest.fn(() => {
       throw 'sync exploded';

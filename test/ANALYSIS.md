@@ -19,3 +19,4 @@
 - Verifies non-`Error` async sync rejections are normalized into a stable protocol error.
 - Verifies schema rejects control characters in kind, target entries, and reason text to keep sync payloads transport/log safe.
 - Verifies leading/trailing control characters are rejected before trim-normalization (for example kind/reason values that would otherwise become valid after trim).
+- Verifies C1 Unicode control characters (for example `\u0085`) are rejected in target entries so non-ASCII control bytes cannot bypass router validation.

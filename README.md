@@ -8,7 +8,7 @@ Forge protocol defines local/browser-executed tRPC procedure contracts used by F
   - `targets` must contain 1..64 entries,
   - each `targets` entry must be non-empty after trim and at most 128 chars,
   - `reason` must be non-empty and at most 512 chars,
-  - raw `kind` / each `targets` entry / `reason` reject ASCII control chars (e.g., `\n`, `\t`) before trim-normalization so hidden leading/trailing control bytes cannot slip through,
+  - raw `kind` / each `targets` entry / `reason` reject Unicode control chars (`Cc`, including ASCII/C1 controls like `\n`, `\t`, `\u0085`) before trim-normalization so hidden leading/trailing control bytes cannot slip through,
   - unexpected/unknown payload keys are rejected (`.strict()`).
 - Router guards missing `ctx.app.service.sync` and throws a clear error before dispatch, including the received runtime type (for example `undefined`/`null`) to speed misconfiguration triage.
 - Router now also guards property-accessor failures while reading `ctx.app.service.sync`, replacing opaque getter exceptions with a stable actionable error while preserving original throwable via `Error.cause` for debugging.

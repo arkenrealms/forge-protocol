@@ -8,7 +8,7 @@ const createErrorWithCause = (message: string, cause: unknown) => {
   return error;
 };
 
-const containsControlChars = (value: string) => /[\u0000-\u001F\u007F]/.test(value);
+const containsControlChars = (value: string) => /[\p{Cc}]/u.test(value);
 
 const describeValueType = (value: unknown) => {
   if (value === null) {
