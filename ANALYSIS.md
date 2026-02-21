@@ -15,6 +15,7 @@
   - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing/non-callable and includes constructor-aware received runtime type diagnostics (`undefined`, `null`, `object:Object`, etc.) for faster configuration debugging,
   - safely falls back to `object:uninspectable-constructor` when constructor introspection itself throws, preventing secondary diagnostic crashes while building error messages,
+  - sanitizes constructor-name diagnostics by stripping control/format chars and truncating overly long names to keep missing-handler errors stable and log-safe,
   - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals) and preserves underlying throwable as `Error.cause` for debuggability,
   - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch,
   - normalizes `kind`/`targets`/`reason` to Unicode NFC for stable canonical payload representation,

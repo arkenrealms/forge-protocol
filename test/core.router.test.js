@@ -56,6 +56,36 @@ describe('forge protocol core.sync router', () => {
     );
   });
 
+  test('sanitizes constructor diagnostics when constructor name contains control characters', async () => {
+    const unstableSync = {};
+    Object.defineProperty(unstableSync, 'constructor', {
+      get() {
+        return { name: 'Debug\nType\u200B' };
+      },
+    });
+
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: unstableSync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'forge-protocol core.sync requires ctx.app.service.sync function (received object:Debug Type)'
+    );
+  });
+
+  test('truncates overly long constructor diagnostics for missing handlers', async () => {
+    const unstableSync = {};
+    Object.defineProperty(unstableSync, 'constructor', {
+      get() {
+        return { name: 'A'.repeat(120) };
+      },
+    });
+
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: unstableSync } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      `forge-protocol core.sync requires ctx.app.service.sync function (received object:${'A'.repeat(80)}…)`
+    );
+  });
+
   test('throws a clear error when reading sync handler throws', async () => {
     const service = {};
     Object.defineProperty(service, 'sync', {

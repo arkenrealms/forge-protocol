@@ -10,6 +10,15 @@ const createErrorWithCause = (message: string, cause: unknown) => {
 
 const containsControlChars = (value: string) => /[\p{Cc}\p{Cf}]/u.test(value);
 
+const sanitizeTypeDetail = (value: string, maxLength = 80) => {
+  const withoutControls = value.replace(/[\p{Cc}\p{Cf}]+/gu, ' ').trim();
+  if (withoutControls.length === 0) {
+    return 'unknown';
+  }
+
+  return withoutControls.length > maxLength ? `${withoutControls.slice(0, maxLength)}…` : withoutControls;
+};
+
 const describeValueType = (value: unknown) => {
   if (value === null) {
     return 'null';
@@ -27,7 +36,7 @@ const describeValueType = (value: unknown) => {
   try {
     const constructorName = (value as { constructor?: { name?: unknown } })?.constructor?.name;
     if (typeof constructorName === 'string' && constructorName.length > 0) {
-      return `object:${constructorName}`;
+      return `object:${sanitizeTypeDetail(constructorName)}`;
     }
   } catch {
     return 'object:uninspectable-constructor';
