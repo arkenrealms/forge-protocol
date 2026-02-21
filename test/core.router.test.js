@@ -31,6 +31,14 @@ describe('forge protocol core.sync router', () => {
     ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function (received null)');
   });
 
+  test('surfaces constructor-aware type diagnostics for non-callable object handlers', async () => {
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: {} } } });
+
+    await expect(
+      caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })
+    ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function (received object:Object)');
+  });
+
   test('throws a clear error when reading sync handler throws', async () => {
     const service = {};
     Object.defineProperty(service, 'sync', {

@@ -19,7 +19,17 @@ const describeValueType = (value: unknown) => {
     return 'array';
   }
 
-  return typeof value;
+  const primitiveType = typeof value;
+  if (primitiveType !== 'object') {
+    return primitiveType;
+  }
+
+  const constructorName = (value as { constructor?: { name?: unknown } })?.constructor?.name;
+  if (typeof constructorName === 'string' && constructorName.length > 0) {
+    return `object:${constructorName}`;
+  }
+
+  return 'object';
 };
 
 const createTrimmedSafeString = (fieldName: string, maxLength: number) =>
