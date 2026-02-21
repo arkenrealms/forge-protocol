@@ -36,48 +36,36 @@ const describeValueType = (value: unknown) => {
   return 'object';
 };
 
-const createTrimmedSafeString = (fieldName: string, maxLength: number) =>
-  z
-    .string()
-    .refine((value) => !containsControlChars(value), `${fieldName} must not contain control characters`)
-    .transform((value) => value.trim().normalize('NFC'))
-    .pipe(
-      z
-        .string()
-        .min(1, `${fieldName} is required`)
-        .max(maxLength, `${fieldName} must be at most ${maxLength} characters`)
-    );
+const zz = {
+  string: (fieldName: string, maxLength: number) =>
+    z
+      .string()
+      .refine((value) => !containsControlChars(value), `${fieldName} must not contain control characters`)
+      .transform((value) => value.trim().normalize('NFC'))
+      .pipe(
+        z
+          .string()
+          .min(1, `${fieldName} is required`)
+          .max(maxLength, `${fieldName} must be at most ${maxLength} characters`)
+      ),
+};
+
+const syncInputSchema = z
+  .object({
+    kind: zz.string('kind', 128),
+    targets: z.array(zz.string('target entry', 128)).min(1, 'at least one target is required').max(64, 'at most 64 targets are allowed'),
+    reason: zz.string('reason', 512),
+  })
+  .strict()
+  .refine(({ targets }) => new Set(targets).size === targets.length, {
+    path: ['targets'],
+    message: 'targets must be unique',
+  });
 
 export const createRouter = (t: any) =>
   t.router({
     sync: t.procedure
-      .input(
-        z
-          .object({
-            kind: createTrimmedSafeString('kind', 128),
-            targets: z
-              .array(createTrimmedSafeString('target entry', 128))
-              .min(1, 'at least one target is required')
-              .max(64, 'at most 64 targets are allowed'),
-            reason: createTrimmedSafeString('reason', 512),
-          })
-          .strict()
-          .superRefine((value, ctx) => {
-            const seen = new Set();
-            for (const target of value.targets) {
-              const normalizedTarget = target.trim();
-              if (seen.has(normalizedTarget)) {
-                ctx.addIssue({
-                  code: z.ZodIssueCode.custom,
-                  path: ['targets'],
-                  message: 'targets must be unique',
-                });
-                break;
-              }
-              seen.add(normalizedTarget);
-            }
-          })
-      )
+      .input(syncInputSchema)
       .mutation(async ({ input, ctx }) => {
         let sync: unknown;
         try {

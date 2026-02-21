@@ -33,6 +33,7 @@
 - Added explicit received-type diagnostics for missing/non-callable `ctx.app.service.sync` (including null/undefined) so environment misconfiguration can be identified directly from protocol errors without extra instrumentation.
 - Expanded missing-handler diagnostics to include constructor-aware object labels (for example `object:Object`) so non-callable object wiring mistakes can be triaged quickly without additional local logging.
 - Hardened diagnostic type rendering so if a malformed/proxy-like `sync` object throws when reading `.constructor`, the router still returns a stable missing-handler error (`object:uninspectable-constructor`) instead of failing during error-message construction.
+- Simplified router readability per review feedback on PR #2: extracted string validation to `zz.string(...)`, moved sync input validation into `syncInputSchema`, and replaced the inline `superRefine` duplicate check with a concise schema-level `refine` while preserving behavior/messages.
 
 ## Next safe code targets
 - Tighten `ctx` typing for `core.sync` to reduce `any` usage without adding unnecessary abstraction.
