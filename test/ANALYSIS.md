@@ -4,6 +4,7 @@
 - Verifies missing `sync` handler throws a clear, actionable error including the received runtime type.
 - Verifies missing-handler type diagnostics explicitly report `null` when `ctx.app.service.sync` is set to null.
 - Verifies missing-handler diagnostics include constructor-aware type details (`object:Object`) when `ctx.app.service.sync` is a non-callable object.
+- Verifies missing-handler diagnostics gracefully fall back to `object:uninspectable-constructor` when inspecting a non-callable object's constructor throws.
 - Verifies sync-handler property accessor failures are converted into a stable protocol error while preserving the original exception in `Error.cause`.
 - Verifies schema rejects empty `targets` arrays.
 - Verifies schema rejects blank/whitespace `reason` values before service dispatch.

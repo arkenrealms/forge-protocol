@@ -24,9 +24,13 @@ const describeValueType = (value: unknown) => {
     return primitiveType;
   }
 
-  const constructorName = (value as { constructor?: { name?: unknown } })?.constructor?.name;
-  if (typeof constructorName === 'string' && constructorName.length > 0) {
-    return `object:${constructorName}`;
+  try {
+    const constructorName = (value as { constructor?: { name?: unknown } })?.constructor?.name;
+    if (typeof constructorName === 'string' && constructorName.length > 0) {
+      return `object:${constructorName}`;
+    }
+  } catch {
+    return 'object:uninspectable-constructor';
   }
 
   return 'object';

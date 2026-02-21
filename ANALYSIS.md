@@ -14,6 +14,7 @@
   - rejects empty/whitespace `reason` and caps length to 512 chars,
   - rejects unknown input keys via strict schema mode,
   - throws a clear error when `ctx.app.service.sync` is missing/non-callable and includes constructor-aware received runtime type diagnostics (`undefined`, `null`, `object:Object`, etc.) for faster configuration debugging,
+  - safely falls back to `object:uninspectable-constructor` when constructor introspection itself throws, preventing secondary diagnostic crashes while building error messages,
   - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals) and preserves underlying throwable as `Error.cause` for debuggability,
   - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch,
   - normalizes `kind`/`targets`/`reason` to Unicode NFC for stable canonical payload representation,
@@ -31,6 +32,7 @@
 - Preserved original throwables in `Error.cause` for accessor/read and non-Error sync failures so operators can inspect root cause without losing the stable protocol-facing error message.
 - Added explicit received-type diagnostics for missing/non-callable `ctx.app.service.sync` (including null/undefined) so environment misconfiguration can be identified directly from protocol errors without extra instrumentation.
 - Expanded missing-handler diagnostics to include constructor-aware object labels (for example `object:Object`) so non-callable object wiring mistakes can be triaged quickly without additional local logging.
+- Hardened diagnostic type rendering so if a malformed/proxy-like `sync` object throws when reading `.constructor`, the router still returns a stable missing-handler error (`object:uninspectable-constructor`) instead of failing during error-message construction.
 
 ## Next safe code targets
 - Tighten `ctx` typing for `core.sync` to reduce `any` usage without adding unnecessary abstraction.

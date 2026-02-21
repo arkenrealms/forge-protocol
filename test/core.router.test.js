@@ -39,6 +39,23 @@ describe('forge protocol core.sync router', () => {
     ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function (received object:Object)');
   });
 
+  test('falls back to uninspectable constructor diagnostics when constructor access throws', async () => {
+    const unstableSync = {};
+    Object.defineProperty(unstableSync, 'constructor', {
+      get() {
+        throw new Error('constructor getter exploded');
+      },
+    });
+
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: unstableSync } } });
+
+    await expect(
+      caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })
+    ).rejects.toThrow(
+      'forge-protocol core.sync requires ctx.app.service.sync function (received object:uninspectable-constructor)'
+    );
+  });
+
   test('throws a clear error when reading sync handler throws', async () => {
     const service = {};
     Object.defineProperty(service, 'sync', {
