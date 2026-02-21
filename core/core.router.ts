@@ -40,7 +40,7 @@ const zz = {
   string: (fieldName: string, maxLength: number) =>
     z
       .string()
-      .refine((value) => !containsControlChars(value), `${fieldName} must not contain control characters`)
+      .refine((value) => !containsControlChars(value), `${fieldName} must not contain control/format characters`)
       .transform((value) => value.trim().normalize('NFC'))
       .pipe(
         z

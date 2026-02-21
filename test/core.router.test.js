@@ -211,7 +211,7 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
     await expect(caller.sync({ kind: '\nrefresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
-      'kind must not contain control characters'
+      'kind must not contain control/format characters'
     );
     expect(sync).not.toHaveBeenCalled();
   });
@@ -221,7 +221,7 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
     await expect(caller.sync({ kind: 'refresh', targets: ['ui\tpanel'], reason: 'manual' })).rejects.toThrow(
-      'target entry must not contain control characters'
+      'target entry must not contain control/format characters'
     );
     expect(sync).not.toHaveBeenCalled();
   });
@@ -231,7 +231,7 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
     await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual\nops' })).rejects.toThrow(
-      'reason must not contain control characters'
+      'reason must not contain control/format characters'
     );
     expect(sync).not.toHaveBeenCalled();
   });
@@ -241,7 +241,7 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
     await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual\n' })).rejects.toThrow(
-      'reason must not contain control characters'
+      'reason must not contain control/format characters'
     );
     expect(sync).not.toHaveBeenCalled();
   });
@@ -251,7 +251,7 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
     await expect(caller.sync({ kind: 'refresh', targets: ['ui\u0085panel'], reason: 'manual' })).rejects.toThrow(
-      'target entry must not contain control characters'
+      'target entry must not contain control/format characters'
     );
     expect(sync).not.toHaveBeenCalled();
   });
@@ -261,7 +261,7 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync } } });
 
     await expect(caller.sync({ kind: 're\u200Bfresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
-      'kind must not contain control characters'
+      'kind must not contain control/format characters'
     );
     expect(sync).not.toHaveBeenCalled();
   });
