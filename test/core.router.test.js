@@ -20,7 +20,7 @@ describe('forge protocol core.sync router', () => {
 
     await expect(
       caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })
-    ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function (received undefined)');
+    ).rejects.toThrow('forge-protocol core.sync requires invokable ctx.app.service.sync function (received undefined)');
   });
 
   test('surfaces the received sync handler type in missing-handler errors', async () => {
@@ -28,7 +28,7 @@ describe('forge protocol core.sync router', () => {
 
     await expect(
       caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })
-    ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function (received null)');
+    ).rejects.toThrow('forge-protocol core.sync requires invokable ctx.app.service.sync function (received null)');
   });
 
   test('surfaces constructor-aware type diagnostics for non-callable object handlers', async () => {
@@ -36,7 +36,17 @@ describe('forge protocol core.sync router', () => {
 
     await expect(
       caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })
-    ).rejects.toThrow('forge-protocol core.sync requires ctx.app.service.sync function (received object:Object)');
+    ).rejects.toThrow('forge-protocol core.sync requires invokable ctx.app.service.sync function (received object:Object)');
+  });
+
+  test('rejects class constructors as non-invokable sync handlers', async () => {
+    class SyncHandler {}
+
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: SyncHandler } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'forge-protocol core.sync requires invokable ctx.app.service.sync function (received function:SyncHandler)'
+    );
   });
 
   test('falls back to uninspectable constructor diagnostics when constructor access throws', async () => {
@@ -52,7 +62,7 @@ describe('forge protocol core.sync router', () => {
     await expect(
       caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })
     ).rejects.toThrow(
-      'forge-protocol core.sync requires ctx.app.service.sync function (received object:uninspectable-constructor)'
+      'forge-protocol core.sync requires invokable ctx.app.service.sync function (received object:uninspectable-constructor)'
     );
   });
 
@@ -67,7 +77,7 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: unstableSync } } });
 
     await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
-      'forge-protocol core.sync requires ctx.app.service.sync function (received object:Debug Type)'
+      'forge-protocol core.sync requires invokable ctx.app.service.sync function (received object:Debug Type)'
     );
   });
 
@@ -82,7 +92,7 @@ describe('forge protocol core.sync router', () => {
     const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: unstableSync } } });
 
     await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
-      `forge-protocol core.sync requires ctx.app.service.sync function (received object:${'A'.repeat(80)}…)`
+      `forge-protocol core.sync requires invokable ctx.app.service.sync function (received object:${'A'.repeat(80)}…)`
     );
   });
 

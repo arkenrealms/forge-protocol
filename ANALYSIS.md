@@ -13,7 +13,7 @@
   - rejects Unicode control/format characters (`Cc` + `Cf`) in raw `kind`, target entries, and `reason` before trim-normalization to avoid hidden payload drift (including invisible format chars) into sync services,
   - rejects empty/whitespace `reason` and caps length to 512 chars,
   - rejects unknown input keys via strict schema mode,
-  - throws a clear error when `ctx.app.service.sync` is missing/non-callable and includes constructor-aware received runtime type diagnostics (`undefined`, `null`, `object:Object`, etc.) for faster configuration debugging,
+  - throws a clear error when `ctx.app.service.sync` is missing/non-invokable and includes constructor-aware received runtime type diagnostics (`undefined`, `null`, `object:Object`, `function:SyncHandler`, etc.) for faster configuration debugging,
   - safely falls back to `object:uninspectable-constructor` when constructor introspection itself throws, preventing secondary diagnostic crashes while building error messages,
   - sanitizes constructor-name diagnostics by stripping control/format chars and truncating overly long names to keep missing-handler errors stable and log-safe,
   - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals) and preserves underlying throwable as `Error.cause` for debuggability,
@@ -25,6 +25,8 @@
 - `test/core.router.test.js` now covers both dispatch behavior and schema-level rejection paths.
 
 ## Change rationale (2026-02-21)
+- Rejected class constructors as non-invokable sync handlers so `core.sync` fails fast with a stable configuration error before runtime invocation throws `Class constructor ... cannot be invoked without 'new'`.
+- Expanded missing-handler diagnostics to include named-function detail (`function:<name>`) so operator triage can distinguish plain callable functions from class-constructor wiring mistakes.
 - Clarified validation error text from `control characters` to `control/format characters` so operator-facing failures match the actual `Cc` + `Cf` rejection behavior already enforced in code and tests.
 
 ## Change rationale (2026-02-20)

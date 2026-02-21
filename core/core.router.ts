@@ -29,6 +29,12 @@ const describeValueType = (value: unknown) => {
   }
 
   const primitiveType = typeof value;
+  if (primitiveType === 'function') {
+    const rawName = (value as { name?: unknown })?.name;
+    const fnName = typeof rawName === 'string' ? sanitizeTypeDetail(rawName) : 'unknown';
+    return fnName === 'unknown' ? 'function' : `function:${fnName}`;
+  }
+
   if (primitiveType !== 'object') {
     return primitiveType;
   }
@@ -44,6 +50,18 @@ const describeValueType = (value: unknown) => {
 
   return 'object';
 };
+
+const isClassConstructor = (value: unknown) => {
+  if (typeof value !== 'function') {
+    return false;
+  }
+
+  const source = Function.prototype.toString.call(value);
+  return /^class\s/.test(source);
+};
+
+const isInvokableSyncHandler = (value: unknown): value is (input: unknown, ctx: unknown) => unknown =>
+  typeof value === 'function' && !isClassConstructor(value);
 
 const zz = {
   string: (fieldName: string, maxLength: number) =>
@@ -83,9 +101,9 @@ export const createRouter = (t: any) =>
           throw createErrorWithCause('forge-protocol core.sync could not read ctx.app.service.sync', error);
         }
 
-        if (typeof sync !== 'function') {
+        if (!isInvokableSyncHandler(sync)) {
           throw new Error(
-            `forge-protocol core.sync requires ctx.app.service.sync function (received ${describeValueType(sync)})`
+            `forge-protocol core.sync requires invokable ctx.app.service.sync function (received ${describeValueType(sync)})`
           );
         }
 

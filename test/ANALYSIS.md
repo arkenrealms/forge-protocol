@@ -2,6 +2,7 @@
 
 - Verifies `core.sync` dispatches to `ctx.app.service.sync` when payload is valid.
 - Verifies missing `sync` handler throws a clear, actionable error including the received runtime type.
+- Verifies class-constructor `sync` handlers are rejected as non-invokable with explicit function-name diagnostics.
 - Verifies missing-handler type diagnostics explicitly report `null` when `ctx.app.service.sync` is set to null.
 - Verifies missing-handler diagnostics include constructor-aware type details (`object:Object`) when `ctx.app.service.sync` is a non-callable object.
 - Verifies missing-handler diagnostics gracefully fall back to `object:uninspectable-constructor` when inspecting a non-callable object's constructor throws.
