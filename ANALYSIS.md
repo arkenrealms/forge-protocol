@@ -30,6 +30,7 @@
 - Clarified validation error text from `control characters` to `control/format characters` so operator-facing failures match the actual `Cc` + `Cf` rejection behavior already enforced in code and tests.
 - Hardened function-type diagnostics so if reading a handler's `.name` throws (proxy/getter edge cases), the router still reports a stable `function:uninspectable-name` type instead of crashing while constructing an error message.
 - Hardened class-constructor detection so `Function.prototype.toString` inspection failures (for example revoked proxies) no longer crash routing logic before normal handler invocation/error flow.
+- Added explicit `function:anonymous` diagnostics for unnamed class-constructor handlers so missing-handler errors remain actionable even when runtime metadata omits a function name.
 
 ## Change rationale (2026-02-20)
 - Tightened control-character validation order so raw `kind`, `targets`, and `reason` are checked before trim-normalization; this closes a gap where leading/trailing control bytes (for example a trailing newline) could be trimmed away and accepted.

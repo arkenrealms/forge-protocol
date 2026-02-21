@@ -32,8 +32,12 @@ const describeValueType = (value: unknown) => {
   if (primitiveType === 'function') {
     try {
       const rawName = (value as { name?: unknown })?.name;
-      const fnName = typeof rawName === 'string' ? sanitizeTypeDetail(rawName) : 'unknown';
-      return fnName === 'unknown' ? 'function' : `function:${fnName}`;
+      if (typeof rawName === 'string') {
+        const fnName = sanitizeTypeDetail(rawName);
+        return fnName === 'unknown' ? 'function:anonymous' : `function:${fnName}`;
+      }
+
+      return 'function';
     } catch {
       return 'function:uninspectable-name';
     }

@@ -49,6 +49,16 @@ describe('forge protocol core.sync router', () => {
     );
   });
 
+  test('labels anonymous class constructors as anonymous in missing-handler diagnostics', async () => {
+    const anonymousSyncHandler = Function('return class {}')();
+
+    const caller = t.createCallerFactory(createRouter(t))({ app: { service: { sync: anonymousSyncHandler } } });
+
+    await expect(caller.sync({ kind: 'refresh', targets: ['ui'], reason: 'manual' })).rejects.toThrow(
+      'forge-protocol core.sync requires invokable ctx.app.service.sync function (received function:anonymous)'
+    );
+  });
+
   test('falls back to uninspectable constructor diagnostics when constructor access throws', async () => {
     const unstableSync = {};
     Object.defineProperty(unstableSync, 'constructor', {
