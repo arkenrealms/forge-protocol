@@ -5,21 +5,46 @@
 - Current live source footprint is minimal (`index.ts`, `core/core.router.ts`).
 
 ## Findings
-- `core/core.router.ts` defines a single `sync` mutation with broad `any` typing for `t`, `ctx`, and `service` dispatch.
-- `index.ts` exports router helpers and wires `core` namespace; typing is intentionally loose.
-- Gate verification in this run:
-  - `npm test` fails (`Missing script: "test"`).
-  - temporary local harness probe (`"test": "jest --runInBand --coverage=false"`) still fails with `jest: command not found` in this runtime, so it was reverted to keep mainline clean.
-- With no runnable package test command, source hardening is blocked by the source-change test gate for this slot.
+- `core/core.router.ts` defines a single `sync` mutation with runtime guardrails:
+  - rejects empty/whitespace `kind` and caps length to 128 chars,
+  - rejects empty `targets` arrays, arrays above 64 entries, and whitespace-only target entries,
+  - rejects overlong target entries (>128 chars),
+  - rejects duplicate `targets` after trim normalization,
+  - rejects Unicode control/format characters (`Cc` + `Cf`) in raw `kind`, target entries, and `reason` before trim-normalization to avoid hidden payload drift (including invisible format chars) into sync services,
+  - rejects empty/whitespace `reason` and caps length to 512 chars,
+  - rejects unknown input keys via strict schema mode,
+  - throws a clear error when `ctx.app.service.sync` is missing/non-invokable and includes constructor-aware received runtime type diagnostics (`undefined`, `null`, `object:Object`, `function:SyncHandler`, etc.) for faster configuration debugging,
+  - safely falls back to `object:uninspectable-constructor` when constructor introspection itself throws, preventing secondary diagnostic crashes while building error messages,
+  - sanitizes constructor-name diagnostics by stripping control/format chars and truncating overly long names to keep missing-handler errors stable and log-safe,
+  - catches/normalizes accessor failures while reading `ctx.app.service.sync` (stable protocol error instead of leaking getter internals) and preserves underlying throwable as `Error.cause` for debuggability,
+  - normalizes trimmed `kind`, `targets`, and `reason` before service dispatch,
+  - normalizes `kind`/`targets`/`reason` to Unicode NFC for stable canonical payload representation,
+  - catches non-`Error` throwables/rejections from `sync` and emits a stable protocol error with received throwable type details (`string`, `number`, etc.) to keep failure shape predictable while improving operator diagnostics.
+- `index.ts` exports router helpers and wires `core` namespace; typing remains intentionally loose.
+- Package test script now runs `"test": "npm run dist && jest --runInBand"` so tests always execute against freshly built output and cannot drift from source edits; runnable via `rushx test`.
+- `test/core.router.test.js` now covers both dispatch behavior and schema-level rejection paths.
 
-## Next safe code targets (after minimal Jest+TS harness is added)
-- Add package scripts:
-  - `"test": "jest --runInBand"`
-  - `"test:watch": "jest --watch"` (optional)
-- Add minimal Jest TS support in-package (no ad-hoc npx):
-  - dev deps: `ts-jest`, `typescript`.
-  - `jest.config.ts` using `preset: 'ts-jest'`.
-- Then apply focused source improvements with tests:
-  - explicit context/service typing for `sync` dispatch,
-  - input schema validation edge tests (`kind`, `targets`, `reason`),
-  - dispatch/error-shape tests (`ctx.app.service.sync` invocation + thrown/missing service behavior).
+## Change rationale (2026-02-21)
+- Rejected class constructors as non-invokable sync handlers so `core.sync` fails fast with a stable configuration error before runtime invocation throws `Class constructor ... cannot be invoked without 'new'`.
+- Expanded missing-handler diagnostics to include named-function detail (`function:<name>`) so operator triage can distinguish plain callable functions from class-constructor wiring mistakes.
+- Clarified validation error text from `control characters` to `control/format characters` so operator-facing failures match the actual `Cc` + `Cf` rejection behavior already enforced in code and tests.
+- Hardened function-type diagnostics so if reading a handler's `.name` throws (proxy/getter edge cases), the router still reports a stable `function:uninspectable-name` type instead of crashing while constructing an error message.
+- Hardened class-constructor detection so `Function.prototype.toString` inspection failures (for example revoked proxies) no longer crash routing logic before normal handler invocation/error flow.
+- Added explicit `function:anonymous` diagnostics for unnamed class-constructor handlers so missing-handler errors remain actionable even when runtime metadata omits a function name.
+
+## Change rationale (2026-02-20)
+- Tightened control-character validation order so raw `kind`, `targets`, and `reason` are checked before trim-normalization; this closes a gap where leading/trailing control bytes (for example a trailing newline) could be trimmed away and accepted.
+- Expanded control-character coverage from ASCII-only to full Unicode `Cc` controls so C1 bytes (for example `\u0085`) cannot bypass payload/log safety checks.
+- Extended validation to Unicode format controls (`Cf`, for example zero-width space `\u200B`) so invisible characters cannot bypass payload/log safety checks.
+- Added NFC Unicode normalization for payload strings so canonically equivalent text (for example `café` vs `cafe\u0301`) is dispatched consistently and duplicate-target detection remains reliable across composition forms.
+- Updated the package test pipeline to build before Jest, preventing stale `build/` artifacts from masking source-level router changes during maintenance runs.
+- Preserved original throwables in `Error.cause` for accessor/read and non-Error sync failures so operators can inspect root cause without losing the stable protocol-facing error message.
+- Added received-type diagnostics to non-Error sync failure messages (`received string`, `received number`, etc.) so production triage can identify bad throw/reject patterns without spelunking stack traces.
+- Added explicit received-type diagnostics for missing/non-callable `ctx.app.service.sync` (including null/undefined) so environment misconfiguration can be identified directly from protocol errors without extra instrumentation.
+- Expanded missing-handler diagnostics to include constructor-aware object labels (for example `object:Object`) so non-callable object wiring mistakes can be triaged quickly without additional local logging.
+- Hardened diagnostic type rendering so if a malformed/proxy-like `sync` object throws when reading `.constructor`, the router still returns a stable missing-handler error (`object:uninspectable-constructor`) instead of failing during error-message construction.
+- Simplified router readability per review feedback on PR #2: extracted string validation to `zz.string(...)`, moved sync input validation into `syncInputSchema`, and replaced the inline `superRefine` duplicate check with a concise schema-level `refine` while preserving behavior/messages.
+
+## Next safe code targets
+- Tighten `ctx` typing for `core.sync` to reduce `any` usage without adding unnecessary abstraction.
+- Add schema tests for `kind` normalization edge-cases and mixed valid/invalid `targets` arrays.

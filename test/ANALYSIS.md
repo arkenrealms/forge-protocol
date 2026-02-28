@@ -1,0 +1,31 @@
+# arken/forge/protocol/test/ANALYSIS.md
+
+- Verifies `core.sync` dispatches to `ctx.app.service.sync` when payload is valid.
+- Verifies missing `sync` handler throws a clear, actionable error including the received runtime type.
+- Verifies class-constructor `sync` handlers are rejected as non-invokable with explicit function-name diagnostics.
+- Verifies anonymous class-constructor handlers are labeled as `function:anonymous` in missing-handler diagnostics.
+- Verifies missing-handler type diagnostics explicitly report `null` when `ctx.app.service.sync` is set to null.
+- Verifies missing-handler diagnostics include constructor-aware type details (`object:Object`) when `ctx.app.service.sync` is a non-callable object.
+- Verifies missing-handler diagnostics gracefully fall back to `object:uninspectable-constructor` when inspecting a non-callable object's constructor throws.
+- Verifies missing-handler diagnostics sanitize control/format characters in constructor-name metadata.
+- Verifies missing-handler diagnostics truncate excessive constructor-name metadata to bounded length.
+- Verifies sync-handler property accessor failures are converted into a stable protocol error while preserving the original exception in `Error.cause`.
+- Verifies schema rejects empty `targets` arrays.
+- Verifies schema rejects blank/whitespace `reason` values before service dispatch.
+- Verifies schema rejects mixed valid/blank `targets` arrays.
+- Verifies schema rejects unknown keys to prevent silent payload drift.
+- Verifies schema rejects duplicate targets after trim normalization.
+- Verifies schema rejects oversized `kind` values (>128 chars).
+- Verifies schema rejects oversized target entries (>128 chars).
+- Verifies schema rejects oversized target arrays (>64 entries).
+- Verifies schema rejects oversized `reason` values (>512 chars).
+- Verifies dispatch payload is normalized (trimmed + Unicode NFC) before reaching the sync service.
+- Verifies whitespace-only `kind` is rejected before service dispatch.
+- Verifies non-`Error` sync throwables are normalized into a stable protocol error that includes received throwable runtime type diagnostics.
+- Verifies non-`Error` async sync rejections are normalized into a stable protocol error that includes received throwable runtime type diagnostics.
+- Verifies schema rejects control/format characters in kind, target entries, and reason text to keep sync payloads transport/log safe.
+- Verifies leading/trailing control characters are rejected before trim-normalization (for example kind/reason values that would otherwise become valid after trim).
+- Verifies C1 Unicode control characters (for example `\u0085`) are rejected in target entries so non-ASCII control bytes cannot bypass router validation.
+- Verifies Unicode format control characters (for example zero-width space `\u200B`) are rejected in `kind` so invisible payload bytes cannot bypass validation.
+- Verifies class-constructor missing-handler diagnostics fall back to `function:uninspectable-name` when function-name inspection throws.
+- Verifies revoked proxy sync handlers do not crash class-constructor detection and still fail through normal invocation error flow.
